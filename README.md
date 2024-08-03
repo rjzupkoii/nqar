@@ -15,9 +15,10 @@ Presuming Windows-Subsystem for Linux and VS Code, [rustup](https://rustup.rs/) 
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-sudo apt install cmake
+sudo install cmake
 sudo apt install pkg-config
-sudo apt install sudo apt install fontconfig libfontconfig-dev
+sudo apt install fontconfig libfontconfig-dev
+sudo apt install libgl-dev libxrandr2 libxi6
 cargo check
 ```
 

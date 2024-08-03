@@ -3,3 +3,6 @@
 
 # Rust specific entries
 /target
+
+# RLTK specific entries
+/resources
