@@ -1,64 +1,18 @@
 // main.rs
 //
 // Main entry point for NQAR.
-use std::cmp::{min, max};
-
-use rltk::{GameState, Rltk, RGB, VirtualKeyCode};
+use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
 
-// Constants for the screen bounds
-const WINDOW_WIDTH: i32 = 79;
-const WINDOW_HEIGHT: i32 = 49;
-
-/// Structure for an entities location
-#[derive(Component)]
-struct Position {
-    x: i32,
-    y: i32,
-}
-
-/// Structure for entities that can be rendered
-#[derive(Component)]
-struct Renderable {
-    glyph: rltk::FontCharType,
-    fg: RGB,
-    bg: RGB,
-}
-
-/// Structure for the player entity
-#[derive(Component, Debug)]
-struct Player {}
+mod components;
+pub use components::*;
+mod player;
+pub use player::*;
 
 /// Structure for the state of the game world
-struct State {
+pub struct State {
     ecs: World
-}
-
-/// Try to move the player's character based upon the delta provided
-fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
-    let mut positions = ecs.write_storage::<Position>();
-    let mut players = ecs.write_storage::<Player>();
-
-    for (_player, pos) in (&mut players, &mut positions).join() {
-        pos.x = min(WINDOW_WIDTH , max(0, pos.x + delta_x));
-        pos.y = min(WINDOW_HEIGHT, max(0, pos.y + delta_y));
-    }
-}
-
-/// Handle the player input
-fn player_input(gs: &mut State, ctx: &mut Rltk) {
-    // Player movement
-    match ctx.key {
-        None => {}      // Nothing happened
-        Some(key) => match key {
-            VirtualKeyCode::Left => try_move_player(-1, 0, &mut gs.ecs),
-            VirtualKeyCode::Right => try_move_player(1, 0, &mut gs.ecs),
-            VirtualKeyCode::Up => try_move_player(0, -1, &mut gs.ecs),
-            VirtualKeyCode::Down => try_move_player(0, 1, &mut gs.ecs),
-            _ => {}     // Ignore anything else
-        },
-    }
 }
 
 impl GameState for State {
