@@ -7,6 +7,8 @@ use specs_derive::Component;
 
 mod components;
 pub use components::*;
+mod map;
+pub use map::*;
 mod player;
 pub use player::*;
 
@@ -22,6 +24,9 @@ impl GameState for State {
         player_input(self, ctx);
         self.run_systems();
 
+        let map = self.ecs.fetch::<Vec<TileType>>();
+        draw_map(&map, ctx);
+        
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
 
@@ -51,6 +56,9 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
+
+    // Create the map
+    gs.ecs.insert(new_map());
 
     // Create the player entity
     gs.ecs
