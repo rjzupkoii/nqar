@@ -1,0 +1,5 @@
+# IDE specific entries
+/.vscode
+
+# Rust specific entries
+/target
