@@ -12,11 +12,7 @@ pub enum TileType {
     Floor, Wall
 }
 
-/// Convert from X, Y coordinates to index
-pub fn xy_idx(x: i32, y: i32) -> usize{
-    (y as usize * (WINDOW_WIDTH + 1) as usize) + x as usize
-}
-
+/// Draw the map to the screen
 pub fn draw_map(map: &[TileType], ctx: &mut Rltk) {
     let mut x = 0;
     let mut y = 0;
@@ -39,8 +35,9 @@ pub fn draw_map(map: &[TileType], ctx: &mut Rltk) {
             y += 1;
         }
     }
-}
+} 
 
+/// Generate a new map
 pub fn new_map() -> Vec<TileType> {
     // Allocate the memory for the map
     let mut map = vec![TileType::Floor; (WINDOW_WIDTH + 1) as usize * (WINDOW_HEIGHT + 1) as usize];
@@ -56,4 +53,9 @@ pub fn new_map() -> Vec<TileType> {
     }
 
     map
+}
+
+/// Convert from X, Y coordinates to index
+pub fn xy_idx(x: i32, y: i32) -> usize{
+    (y as usize * (WINDOW_WIDTH + 1) as usize) + x as usize
 }
