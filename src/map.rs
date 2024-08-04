@@ -21,6 +21,7 @@ pub enum TileType {
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub revealed_tiles: Vec<bool>,
+    pub visible_tiles: Vec<bool>,
     pub rooms: Vec<Rectangle>,
     pub width: i32,
     pub height: i32,
@@ -34,6 +35,7 @@ impl Map {
         let mut map = Map {
             tiles: vec![TileType::Wall; length],
             revealed_tiles: vec![false; length],
+            visible_tiles: vec![false; length],
             rooms: Vec::new(),
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT            
@@ -126,8 +128,8 @@ impl Algorithm2D for Map {
 
 impl BaseMap for Map {
     // Return true if the tile is opaque
-    fn is_opaque(&self, idx:usize) -> bool {
-        self.tiles[idx as usize] == TileType::Wall
+    fn is_opaque(&self, idx: usize) -> bool {
+        self.tiles[idx] == TileType::Wall
     }
 }
 
@@ -142,15 +144,24 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     for (idx, tile) in map.tiles.iter().enumerate() {
         // Only render what we have seen
         if map.revealed_tiles[idx] {
-            // Render the tile based upon the tile type
+            
+            // Prepare the glyph and foreground color based upon the tile
+            let glyph;
+            let mut fg;
             match tile {
                 TileType::Floor => {
-                    ctx.set(x, y, RGB::from_f32(0.5, 0.5, 0.5), RGB::from_f32(0.0, 0.0, 0.0), rltk::to_cp437('.'));
+                    glyph = rltk::to_cp437('.');
+                    fg = RGB::from_f32(0.5, 0.5, 0.5);
                 }
                 TileType::Wall => {
-                    ctx.set(x, y, RGB::from_f32(1.0, 0.0, 0.0), RGB::from_f32(0., 0., 0.), rltk::to_cp437('#'));
+                    glyph = rltk::to_cp437('#');
+                    fg = RGB::from_f32(1.0, 0.0, 0.0);
                 }            
             }
+
+            // Render the tile if it is visible
+            if !map.visible_tiles[idx] { fg = fg.to_greyscale() }
+            ctx.set(x, y, fg, RGB::from_f32(0.0, 0.0, 0.0), glyph);
         }
 
         // Move to next coordinates

@@ -19,6 +19,7 @@ impl<'a> System<'a> for VisibilitySystem {
         let (entities, mut map, pos, mut viewshed, player) = data;
 
         for (ent, viewshed, pos) in (&entities, &mut viewshed, &pos).join() {
+            viewshed.dirty = false;
             viewshed.visible_tiles.clear();
             viewshed.visible_tiles = field_of_view(Point::new(pos.x, pos.y), viewshed.range, &*map);
             viewshed.visible_tiles.retain(|p| p.x >= 0 && p.x < map.width && p.y >= 0 && p.y < map.height );
@@ -26,9 +27,14 @@ impl<'a> System<'a> for VisibilitySystem {
             // If this is the player, reveal what they can see
             let entity : Option<&Player> = player.get(ent);
             if let Some(entity) = entity {
+                // Reset what is currently visible
+                for tile in map.visible_tiles.iter_mut() { *tile = false };
+
+                // Update what has been revealed and is visible
                 for vis in viewshed.visible_tiles.iter() {
                     let idx = map.xy_idx(vis.x, vis.y);
                     map.revealed_tiles[idx] = true;
+                    map.visible_tiles[idx] = true;
                 }
             }
         }
