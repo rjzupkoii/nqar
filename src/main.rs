@@ -3,7 +3,6 @@
 // Main entry point for NQAR.
 use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
-use specs_derive::Component;
 
 mod components;
 pub use components::*;
