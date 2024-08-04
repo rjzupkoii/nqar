@@ -38,10 +38,14 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
     match ctx.key {
         None => {}      // Nothing happened
         Some(key) => match key {
-            VirtualKeyCode::Left => try_move_player(-1, 0, &mut gs.ecs),
-            VirtualKeyCode::Right => try_move_player(1, 0, &mut gs.ecs),
-            VirtualKeyCode::Up => try_move_player(0, -1, &mut gs.ecs),
-            VirtualKeyCode::Down => try_move_player(0, 1, &mut gs.ecs),
+            VirtualKeyCode::Left |
+            VirtualKeyCode::Numpad4 => try_move_player(-1, 0, &mut gs.ecs),
+            VirtualKeyCode::Right |
+            VirtualKeyCode::Numpad6 => try_move_player(1, 0, &mut gs.ecs),
+            VirtualKeyCode::Up |
+            VirtualKeyCode::Numpad8 => try_move_player(0, -1, &mut gs.ecs),
+            VirtualKeyCode::Down |
+            VirtualKeyCode::Numpad2 => try_move_player(0, 1, &mut gs.ecs),
             _ => {}     // Ignore anything else
         },
     }
