@@ -16,7 +16,7 @@ pub use systems::VisibilitySystem;
 
 /// Structure for the state of the game world
 pub struct State {
-    ecs: World
+    pub ecs: World
 }
 
 impl GameState for State {
@@ -26,8 +26,7 @@ impl GameState for State {
         player_input(self, ctx);
         self.run_systems();
 
-        let map = self.ecs.fetch::<Map>();
-        draw_map(&map.tiles, ctx);
+        draw_map(&self.ecs, ctx);
         
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
@@ -80,7 +79,7 @@ fn main() -> rltk::BError {
             bg: RGB::named(rltk::BLACK),
         })
         .with(Player{})
-        .with(Viewshed { visible_tiles: Vec::new(), range: DEFAULT_FOV })
+        .with(Viewshed { visible_tiles: Vec::new(), range: DEFAULT_FOV, dirty: true })
         .build();
 
     // Run the main loop of th game

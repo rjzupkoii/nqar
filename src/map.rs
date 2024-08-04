@@ -3,7 +3,8 @@
 // Defines the map for NQAR.
 use std::cmp::{min, max};
 
-use rltk::{RandomNumberGenerator, Rltk, RGB};
+use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, RGB};
+use specs::prelude::*;
 
 mod rectangle;
 pub use rectangle::*;
@@ -19,6 +20,7 @@ pub enum TileType {
 
 pub struct Map {
     pub tiles: Vec<TileType>,
+    pub revealed_tiles: Vec<bool>,
     pub rooms: Vec<Rectangle>,
     pub width: i32,
     pub height: i32,
@@ -28,8 +30,10 @@ impl Map {
     /// Generate a new map
     pub fn new_map() -> Map {
         // Allocate the memory for the map and rooms
+        let length = ((WINDOW_HEIGHT + 1) * (WINDOW_WIDTH + 1)) as usize;
         let mut map = Map {
-            tiles: vec![TileType::Wall; ((WINDOW_HEIGHT + 1) * (WINDOW_WIDTH + 1)) as usize],
+            tiles: vec![TileType::Wall; length],
+            revealed_tiles: vec![false; length],
             rooms: Vec::new(),
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT            
@@ -113,20 +117,40 @@ impl Map {
     }
 }
 
+impl Algorithm2D for Map {
+    // Return the dimensions of the map
+    fn dimensions(&self) -> Point {
+        Point::new(self.width, self.height)
+    }
+}
+
+impl BaseMap for Map {
+    // Return true if the tile is opaque
+    fn is_opaque(&self, idx:usize) -> bool {
+        self.tiles[idx as usize] == TileType::Wall
+    }
+}
+
 /// Draw the map to the screen
-pub fn draw_map(map: &[TileType], ctx: &mut Rltk) {
+pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
+    // Get the map
+    let map = ecs.fetch::<Map>();
+    
+    // Draw the map to the screen
     let mut x = 0;
     let mut y = 0;
-    
-    for tile in map.iter() {
-        // Render the tile based upon the tile type
-        match tile {
-            TileType::Floor => {
-                ctx.set(x, y, RGB::from_f32(0.5, 0.5, 0.5), RGB::from_f32(0.0, 0.0, 0.0), rltk::to_cp437('.'));
+    for (idx, tile) in map.tiles.iter().enumerate() {
+        // Only render what we have seen
+        if map.revealed_tiles[idx] {
+            // Render the tile based upon the tile type
+            match tile {
+                TileType::Floor => {
+                    ctx.set(x, y, RGB::from_f32(0.5, 0.5, 0.5), RGB::from_f32(0.0, 0.0, 0.0), rltk::to_cp437('.'));
+                }
+                TileType::Wall => {
+                    ctx.set(x, y, RGB::from_f32(1.0, 0.0, 0.0), RGB::from_f32(0., 0., 0.), rltk::to_cp437('#'));
+                }            
             }
-            TileType::Wall => {
-                ctx.set(x, y, RGB::from_f32(1.0, 0.0, 0.0), RGB::from_f32(0., 0., 0.), rltk::to_cp437('#'));
-            }            
         }
 
         // Move to next coordinates
