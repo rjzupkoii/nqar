@@ -31,7 +31,7 @@ impl Map {
     /// Generate a new map
     pub fn new_map() -> Map {
         // Allocate the memory for the map and rooms
-        let length = ((WINDOW_HEIGHT + 1) * (WINDOW_WIDTH + 1)) as usize;
+        let length = (WINDOW_HEIGHT * WINDOW_WIDTH) as usize;
         let mut map = Map {
             tiles: vec![TileType::Wall; length],
             revealed_tiles: vec![false; length],
@@ -53,8 +53,8 @@ impl Map {
             // Create a new room
             let width = rng.range(MIN_SIZE, MAX_SIZE);
             let height = rng.range(MIN_SIZE, MAX_SIZE);
-            let x = rng.roll_dice(1, 80 - width - 1) - 1;
-            let y = rng.roll_dice(1, 50 - height - 1) - 1;
+            let x = rng.roll_dice(1, WINDOW_WIDTH - width - 1) - 1;
+            let y = rng.roll_dice(1, WINDOW_HEIGHT - height - 1) - 1;
             let new_room = Rectangle::new(x, y, width, height);
 
             // Check to see if the room can be placed
@@ -98,7 +98,7 @@ impl Map {
     fn apply_horizontal_tunnel(&mut self, upper_x: i32, lower_x: i32, y: i32) {
         for x in min(upper_x, lower_x) ..= max(upper_x, lower_x) {
             let idx = self.xy_idx(x, y);
-            if idx > 0 && idx < ((WINDOW_HEIGHT + 1) * (WINDOW_WIDTH + 1)) as usize {
+            if idx > 0 && idx < (WINDOW_HEIGHT * WINDOW_WIDTH) as usize {
                 self.tiles[idx as usize] = TileType::Floor;
             }
         }
@@ -107,7 +107,7 @@ impl Map {
     fn apply_vertical_tunnel(&mut self, upper_y: i32, lower_y: i32, x:i32) {
         for y in min(upper_y, lower_y) ..= max(upper_y, lower_y) {
             let idx = self.xy_idx(x, y);
-            if idx > 0 && idx < ((WINDOW_HEIGHT + 1) * (WINDOW_WIDTH + 1)) as usize {
+            if idx > 0 && idx < (WINDOW_HEIGHT * WINDOW_WIDTH) as usize {
                 self.tiles[idx as usize] = TileType::Floor;
             }
         }
@@ -115,7 +115,7 @@ impl Map {
 
     /// Convert from X, Y coordinates to index
     pub fn xy_idx(&self, x: i32, y: i32) -> usize{
-        (y as usize * (WINDOW_WIDTH + 1) as usize) + x as usize
+        ((y * WINDOW_WIDTH) + x) as usize
     }
 }
 
@@ -166,7 +166,7 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
 
         // Move to next coordinates
         x += 1;
-        if x > WINDOW_WIDTH {
+        if x > WINDOW_WIDTH - 1 {
             x = 0;
             y += 1;
         }

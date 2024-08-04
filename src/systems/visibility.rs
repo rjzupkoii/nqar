@@ -26,7 +26,7 @@ impl<'a> System<'a> for VisibilitySystem {
 
             // If this is the player, reveal what they can see
             let entity : Option<&Player> = player.get(ent);
-            if let Some(entity) = entity {
+            if let Some(_entity) = entity {
                 // Reset what is currently visible
                 for tile in map.visible_tiles.iter_mut() { *tile = false };
 
