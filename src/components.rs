@@ -23,3 +23,10 @@ pub struct Renderable {
     pub fg: rltk::RGB,
     pub bg: rltk::RGB,
 }
+
+/// Structure for the viewshed that can be rendered
+#[derive(Component)]
+pub struct Viewshed {
+    pub visible_tiles: Vec<rltk::Point>,
+    pub range: i32,
+}

@@ -6,23 +6,26 @@ use std::cmp::{min, max};
 use rltk::{Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
-use super::{Player, Position, State, TileType, xy_idx};
+use super::{Map, Player, Position, State, TileType};
 
 use crate::map::WINDOW_HEIGHT as WINDOW_HEIGHT;
 use crate::map::WINDOW_WIDTH as WINDOW_WIDTH;
+
+/// The default field-of-vision (FOV) for a new player character, in tiles
+pub const DEFAULT_FOV: i32 = 8;
 
 /// Try to move the player's character based upon the delta provided
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
-    let map = ecs.fetch::<Vec<TileType>>();
+    let map = ecs.fetch::<Map>();
 
     for (_player, pos) in (&mut players, &mut positions).join() {
         // Get the target location
-        let destination_idx = xy_idx(pos.x + delta_x, pos.y + delta_y);
+        let destination_idx = map.xy_idx(pos.x + delta_x, pos.y + delta_y);
 
         // Don't let the player walk though walls
-        if map[destination_idx] == TileType::Wall {
+        if map.tiles[destination_idx] == TileType::Wall {
             return;
         }
 

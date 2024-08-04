@@ -11,6 +11,8 @@ mod map;
 pub use map::*;
 mod player;
 pub use player::*;
+mod systems;
+pub use systems::VisibilitySystem;
 
 /// Structure for the state of the game world
 pub struct State {
@@ -24,8 +26,8 @@ impl GameState for State {
         player_input(self, ctx);
         self.run_systems();
 
-        let map = self.ecs.fetch::<Vec<TileType>>();
-        draw_map(&map, ctx);
+        let map = self.ecs.fetch::<Map>();
+        draw_map(&map.tiles, ctx);
         
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
@@ -38,6 +40,11 @@ impl GameState for State {
 
 impl State {
     fn run_systems(&mut self) {
+        // Visibility
+        let mut visibility = VisibilitySystem{};
+        visibility.run_now(&self.ecs);
+
+        // Maintain step
         self.ecs.maintain();
     }
 }
@@ -56,12 +63,13 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
+    gs.ecs.register::<Viewshed>();
 
     // Create the map, start the player in the first room
-    let (rooms, map) = new_map();
+    let map: Map = Map::new_map();
+    let (player_x, player_y) = map.rooms[0].center();
     gs.ecs.insert(map);
-    let (player_x, player_y) = rooms[0].center();
-
+    
     // Create the player entity
     gs.ecs
         .create_entity()
@@ -72,6 +80,7 @@ fn main() -> rltk::BError {
             bg: RGB::named(rltk::BLACK),
         })
         .with(Player{})
+        .with(Viewshed { visible_tiles: Vec::new(), range: DEFAULT_FOV })
         .build();
 
     // Run the main loop of th game
