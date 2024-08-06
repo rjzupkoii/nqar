@@ -5,6 +5,12 @@ use rltk;
 use specs::prelude::*;
 use specs_derive::Component;
 
+/// Structure for monster entities
+#[derive(Component, Debug)]
+pub struct Monster {
+    pub name: String,
+}
+
 /// Structure for the player entity
 #[derive(Component, Debug)]
 pub struct Player { }

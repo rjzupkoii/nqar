@@ -3,10 +3,10 @@
 // Management of the player.
 use std::cmp::{min, max};
 
-use rltk::{Rltk, VirtualKeyCode};
+use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
-use super::{Map, Player, Position, State, TileType, Viewshed};
+use super::{Map, Player, Position, RunState, State, TileType, Viewshed};
 
 use crate::map::WINDOW_HEIGHT as WINDOW_HEIGHT;
 use crate::map::WINDOW_WIDTH as WINDOW_WIDTH;
@@ -30,18 +30,28 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
             return;
         }
 
-        // Apply the movement
+        // Apply the movement to the player
         pos.x = min(WINDOW_WIDTH , max(0, pos.x + delta_x));
         pos.y = min(WINDOW_HEIGHT, max(0, pos.y + delta_y));
+
+        // The everyone know where the player is
+        let mut player_pos = ecs.write_resource::<Point>();
+        player_pos.x = pos.x;
+        player_pos.y = pos.y;
+
+        // Flag the player viewshed as dirty
         viewshed.dirty = true;
     }
 }
 
 /// Handle the player input
-pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
+pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     // Player movement
     match ctx.key {
-        None => {}      // Nothing happened
+        None => {
+            // Nothing happened
+            return RunState::Paused
+        }
         Some(key) => match key {
             // Up, down, left, right movement
             VirtualKeyCode::Left |
@@ -62,4 +72,5 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
             _ => {}     // Ignore anything else
         },
     }
+    RunState::Running
 }
