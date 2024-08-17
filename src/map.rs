@@ -113,6 +113,14 @@ impl Map {
         }
     }
 
+    fn is_exit_valid(&self, x:i32, y:i32) -> bool {
+        if x < 1 || x > self.width-1 || y < 1 || y > self.height-1 { 
+            return false; 
+        }
+        let idx = self.xy_idx(x, y);
+        self.tiles[idx as usize] != TileType::Wall
+    }
+
     /// Convert from X, Y coordinates to index
     pub fn xy_idx(&self, x: i32, y: i32) -> usize{
         ((y * WINDOW_WIDTH) + x) as usize
@@ -127,6 +135,30 @@ impl Algorithm2D for Map {
 }
 
 impl BaseMap for Map {
+    // Return the available exits from the given location
+    fn get_available_exits(&self, idx:usize) -> rltk::SmallVec<[(usize, f32); 10]> {
+        let mut exits = rltk::SmallVec::new();
+        let x = idx as i32 % self.width;
+        let y = idx as i32 / self.width;
+        let width = self.width as usize;
+    
+        // Cardinal directions
+        if self.is_exit_valid(x - 1, y) { exits.push((idx - 1, 1.0)) };
+        if self.is_exit_valid(x + 1, y) { exits.push((idx + 1, 1.0)) };
+        if self.is_exit_valid(x, y - 1) { exits.push((idx - width, 1.0)) };
+        if self.is_exit_valid(x, y + 1) { exits.push((idx + width, 1.0)) };
+    
+        exits
+    }
+
+    // Return the Pythagorean distance between two points
+    fn get_pathing_distance(&self, idx1:usize, idx2:usize) -> f32 {
+        let width = self.width as usize;
+        let one = Point::new(idx1 % width, idx1 / width);
+        let two = Point::new(idx2 % width, idx2 / width);
+        rltk::DistanceAlg::Pythagoras.distance2d(one, two)
+    }
+
     // Return true if the tile is opaque
     fn is_opaque(&self, idx: usize) -> bool {
         self.tiles[idx] == TileType::Wall
