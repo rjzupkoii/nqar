@@ -20,8 +20,12 @@ impl<'a> System<'a> for MonsterAI {
 
         for (viewshed, monster, monster_position) in (&mut viewshed, &monster, &mut position).join() {
             if viewshed.visible_tiles.contains(&*player_pos) {
-                // Note that the AI is running
-                println!("{} shouts insults!", monster.name);
+                // TODO Swap this out for an attack
+                let distance = rltk::DistanceAlg::Pythagoras.distance2d(Point::new(monster_position.x, monster_position.y), *player_pos);
+                if distance < 1.5 {
+                    println!("{} shouts insults!", monster.name);
+                    return;
+                }
 
                 // Find a path from the monster to the player
                 let path = rltk::a_star_search(

@@ -11,6 +11,10 @@ pub struct Monster {
     pub name: String,
 }
 
+/// Structure for objects that occupy tiles
+#[derive(Component, Debug)]
+pub struct OccupiesTile { }
+
 /// Structure for the player entity
 #[derive(Component, Debug)]
 pub struct Player { }

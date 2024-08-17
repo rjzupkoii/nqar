@@ -20,6 +20,7 @@ pub enum TileType {
 
 pub struct Map {
     pub tiles: Vec<TileType>,
+    pub occupied_tiles: Vec<bool>,
     pub revealed_tiles: Vec<bool>,
     pub visible_tiles: Vec<bool>,
     pub rooms: Vec<Rectangle>,
@@ -34,6 +35,7 @@ impl Map {
         let length = (WINDOW_HEIGHT * WINDOW_WIDTH) as usize;
         let mut map = Map {
             tiles: vec![TileType::Wall; length],
+            occupied_tiles: vec![false; length],
             revealed_tiles: vec![false; length],
             visible_tiles: vec![false; length],
             rooms: Vec::new(),
@@ -113,12 +115,19 @@ impl Map {
         }
     }
 
+    /// Populate the map with the occupied tiles
+    pub fn populate_occupied(&mut self) {
+        for (ndx, tile) in self.tiles.iter_mut().enumerate() {
+            self.occupied_tiles[ndx] = *tile == TileType::Wall;
+        }
+    }
+
     fn is_exit_valid(&self, x:i32, y:i32) -> bool {
         if x < 1 || x > self.width-1 || y < 1 || y > self.height-1 { 
             return false; 
         }
         let idx = self.xy_idx(x, y);
-        self.tiles[idx as usize] != TileType::Wall
+        !self.occupied_tiles[idx]
     }
 
     /// Convert from X, Y coordinates to index
@@ -147,6 +156,12 @@ impl BaseMap for Map {
         if self.is_exit_valid(x + 1, y) { exits.push((idx + 1, 1.0)) };
         if self.is_exit_valid(x, y - 1) { exits.push((idx - width, 1.0)) };
         if self.is_exit_valid(x, y + 1) { exits.push((idx + width, 1.0)) };
+
+        // Diagonals
+        if self.is_exit_valid(x - 1, y - 1) { exits.push(((idx - width) - 1, 1.45)); }
+        if self.is_exit_valid(x + 1, y - 1) { exits.push(((idx - width) + 1, 1.45)); }
+        if self.is_exit_valid(x - 1, y + 1) { exits.push(((idx + width) - 1, 1.45)); }
+        if self.is_exit_valid(x + 1, y + 1) { exits.push(((idx + width) + 1, 1.45)); }        
     
         exits
     }

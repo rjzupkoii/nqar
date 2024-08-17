@@ -14,6 +14,7 @@ mod player;
 pub use player::*;
 mod systems;
 pub use systems::VisibilitySystem;
+pub use systems::MapIndexingSystem;
 
 /// The current state of the world
 #[derive(PartialEq, Copy, Clone)]
@@ -62,6 +63,10 @@ impl State {
         let mut mob = MonsterAI{};
         mob.run_now(&self.ecs);        
 
+        // Indexing of the map - marking occupied tiles
+        let mut indexing = MapIndexingSystem{};
+        indexing.run_now(&self.ecs);
+
         // Maintain step
         self.ecs.maintain();
     }
@@ -80,6 +85,7 @@ fn main() -> rltk::BError {
         run_state: RunState::Running
     };
     gs.ecs.register::<Monster>();
+    gs.ecs.register::<OccupiesTile>();
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
@@ -115,6 +121,7 @@ fn main() -> rltk::BError {
                 name: format!("{} #{}", &name, count),
             })
             .with(Viewshed{ visible_tiles : Vec::new(), range: DEFAULT_FOV, dirty: true })
+            .with(OccupiesTile{})
             .build();
     }    
     

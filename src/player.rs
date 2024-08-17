@@ -6,7 +6,7 @@ use std::cmp::{min, max};
 use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
-use super::{Map, Player, Position, RunState, State, TileType, Viewshed};
+use super::{Map, Player, Position, RunState, State, Viewshed};
 
 use crate::map::WINDOW_HEIGHT as WINDOW_HEIGHT;
 use crate::map::WINDOW_WIDTH as WINDOW_WIDTH;
@@ -25,8 +25,8 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
         // Get the target location
         let destination_idx = map.xy_idx(pos.x + delta_x, pos.y + delta_y);
 
-        // Don't let the player walk though walls
-        if map.tiles[destination_idx] == TileType::Wall {
+        // Don't let the player walk though things
+        if map.occupied_tiles[destination_idx] {
             return;
         }
 
